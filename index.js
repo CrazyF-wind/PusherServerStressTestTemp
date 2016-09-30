@@ -81,7 +81,7 @@ for (var socket_n = 0; socket_n < 500; socket_n++) {
                 }, interval);
 
                 //var begintime=new Date().getTime();
-                ////console.info("times:"+(new Date().getTime()-begintime));
+                //console.info("times:"+(new Date().getTime()-begintime));
                 //if((new Date().getTime()-begintime)>10000)
                 //{
                 //    console.info("times-in:"+(new Date().getTime()-begintime));
