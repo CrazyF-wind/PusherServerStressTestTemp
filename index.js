@@ -2,7 +2,7 @@ console.info("Socket.io chat test client");
 io = require('socket.io-client');
 var dbhelper = require('./dbtools/dbhelper.js');
 
-for (var socket_n = 0; socket_n < 21; socket_n++) {
+for (var socket_n = 0; socket_n < 500; socket_n++) {
 
     (function () {
 
@@ -28,8 +28,8 @@ for (var socket_n = 0; socket_n < 21; socket_n++) {
 
             inner_socket.on('authenticated', function () {
                 var interval = Math.floor(Math.random() * 10001) + 5000;
-                setInterval(function () {
-                    var index = Math.round(Math.random() * 20);
+                var timers=setInterval(function () {
+                    var index = Math.round(Math.random() * 499);
                     var toUser = process.pid.toString() + "_" + index.toString();
                     inner_socket.emit('sendMessage', {
                         from: inner_socket.my_nick,
@@ -52,7 +52,8 @@ for (var socket_n = 0; socket_n < 21; socket_n++) {
                     dbhelper.updateMongoWithOption('messageDetail', args, {
                         $set: {
                             'status': 'send',
-                            'sendtime': sendtime
+                            'sendtime': sendtime,
+                            'flag':"1000"
                         }
                     }, {
                         upsert: true
@@ -75,8 +76,20 @@ for (var socket_n = 0; socket_n < 21; socket_n++) {
                     })
                     // console.info("sendtime:" + sendtime.getUTCFullYear() + "-" + (sendtime.getUTCMonth() + 1) + "-" + sendtime.getDate()
                     //     + " " + sendtime.getUTCHours() + ":" + sendtime.getUTCMinutes() + ":" + sendtime.getUTCSeconds());
+
+
                 }, interval);
+
+                //var begintime=new Date().getTime();
+                ////console.info("times:"+(new Date().getTime()-begintime));
+                //if((new Date().getTime()-begintime)>10000)
+                //{
+                //    console.info("times-in:"+(new Date().getTime()-begintime));
+                //    clearInterval(timers);
+                //}
             });
+
+
         })();
 
         socket.on('receiveMessage', function (msg) {
