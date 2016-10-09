@@ -12,26 +12,34 @@ exports.init = DB_CONN_STR;
  * @param args  插入内容
  * @callback 返回结果
  */
-exports.insertMongo = function(tablename, args, callback) {
-    var insertdata = function(db, callback) {
-        //连接到表
-        var collection = db.collection(tablename);
-        //插入数据
-        collection.insert(args, function(err, result) {
-            if (err) {
-                console.log('Error:' + err);
-                return;
-            }
-            callback("ok");
+exports.insertMongo = function (tablename, args, callback) {
+    try {
+        var insertdata = function (db, callback) {
+
+            //连接到表
+            var collection = db.collection(tablename);
+            //插入数据
+            collection.insert(args, function (err, result) {
+                if (err) {
+                    console.log('Error:' + err);
+                    return;
+                }
+                callback("ok");
+            });
+        }
+
+
+        MongoClient.connect(DB_CONN_STR, function (err, db) {
+            insertdata(db, function (result) {
+                console.log("insert MongoDB:" + JSON.stringify(result));
+                callback(result);
+                db.close();
+            });
         });
     }
-    MongoClient.connect(DB_CONN_STR, function(err, db) {
-        insertdata(db, function(result) {
-            console.log("insert MongoDB:" + JSON.stringify(result));
-            callback(result);
-            db.close();
-        });
-    });
+    catch (ex) {
+        console.log("" + ex);
+    }
 }
 
 /**
@@ -40,12 +48,12 @@ exports.insertMongo = function(tablename, args, callback) {
  * @param args  查询条件
  * @callback 返回结果
  */
-exports.delMongo = function(tablename, args, callback) {
-    var delData = function(db, callback) {
+exports.delMongo = function (tablename, args, callback) {
+    var delData = function (db, callback) {
         //连接到表
         var collection = db.collection(tablename);
         //删除数据
-        collection.remove(args, function(err, result) {
+        collection.remove(args, function (err, result) {
             if (err) {
                 console.log('Error:' + err);
                 return;
@@ -53,8 +61,8 @@ exports.delMongo = function(tablename, args, callback) {
             callback('ok');
         });
     };
-    MongoClient.connect(DB_CONN_STR, function(err, db) {
-        delData(db, function(result) {
+    MongoClient.connect(DB_CONN_STR, function (err, db) {
+        delData(db, function (result) {
             console.log("del MongoDB:" + JSON.stringify(result));
             callback(result);
             db.close();
@@ -69,12 +77,12 @@ exports.delMongo = function(tablename, args, callback) {
  * @param sets  修改内容，格式：{$set: {value: data}}
  *  @callback 返回结果
  */
-exports.updataMongo = function(tablename, where, sets, callback) {
-    var editdata = function(db, callback) {
+exports.updataMongo = function (tablename, where, sets, callback) {
+    var editdata = function (db, callback) {
         //连接到表
         var collection = db.collection(tablename);
         //查询数据
-        collection.update(where, sets, function(err, result) {
+        collection.update(where, sets, function (err, result) {
             if (err) {
                 console.log('Error:' + err);
                 return;
@@ -82,8 +90,8 @@ exports.updataMongo = function(tablename, where, sets, callback) {
             callback('ok');
         });
     }
-    MongoClient.connect(DB_CONN_STR, function(err, db) {
-        editdata(db, function(result) {
+    MongoClient.connect(DB_CONN_STR, function (err, db) {
+        editdata(db, function (result) {
             console.log("updata MongoDB:" + JSON.stringify(result));
             callback(result);
             db.close();
@@ -99,13 +107,14 @@ exports.updataMongo = function(tablename, where, sets, callback) {
  * @param option upsert: <boolean>,multi: <boolean>,writeConcern: <document>
  * @callback 返回结果
  */
-exports.updateMongoWithOption = function(tablename, where, sets, option, callback) {
+exports.updateMongoWithOption = function (tablename, where, sets, option, callback) {
 
-    var editdata = function(db, callback) {
+    var editdata = function (db, callback) {
         //连接到表
         var collection = db.collection(tablename);
+        //console.log("collection:"+JSON.stringify(db.stats()))
         //查询数据
-        collection.update(where, sets, option, function(err, result) {
+        collection.update(where, sets, option, function (err, result) {
             if (err) {
                 console.log('Error:' + err);
                 return;
@@ -113,13 +122,30 @@ exports.updateMongoWithOption = function(tablename, where, sets, option, callbac
             callback('ok');
         });
     }
-    MongoClient.connect(DB_CONN_STR, function(err, db) {
-        editdata(db, function(result) {
-            console.log("updata MongoDB:" + JSON.stringify(result));
-            callback(result);
-            db.close();
+    MongoClient.connect(DB_CONN_STR,
+        //{
+        //    db: {w: 1, native_parser: false},
+        //    server: {
+        //        poolSize: 1000,
+        //        socketOptions: {connectTimeoutMS: 500},
+        //        auto_reconnect: true
+        //    },
+        //    replSet: {},
+        //    mongos: {}
+        //},
+        function (err, db) {
+            if (err) {
+                console.log('Error:' + err);
+                return;
+            }
+            editdata(db, function (result) {
+                callback(result);
+                db.close();
+                //console.log('connect close' + db);
+            });
         });
-    });
+
+
 }
 
 
@@ -130,12 +156,12 @@ exports.updateMongoWithOption = function(tablename, where, sets, option, callbac
  * @param params 精确匹配
  * @callback 返回结果
  */
-exports.selectMongo = function(tablename, args, params, callback) {
-    var selectData = function(db, callback) {
+exports.selectMongo = function (tablename, args, params, callback) {
+    var selectData = function (db, callback) {
         //连接到表
         var collection = db.collection(tablename);
         //查询数据
-        collection.find(args, params).toArray(function(err, result) {
+        collection.find(args, params).toArray(function (err, result) {
             if (err) {
                 console.log('Error:' + err);
                 return;
@@ -143,8 +169,8 @@ exports.selectMongo = function(tablename, args, params, callback) {
             callback(result);
         });
     }
-    MongoClient.connect(DB_CONN_STR, function(err, db) {
-        selectData(db, function(result) {
+    MongoClient.connect(DB_CONN_STR, function (err, db) {
+        selectData(db, function (result) {
             console.log("select MongoDB:" + JSON.stringify(result));
             callback(result);
             db.close();
@@ -158,12 +184,12 @@ exports.selectMongo = function(tablename, args, params, callback) {
  * @param args 查询字段
  * @param callback 返回值
  */
-exports.selectdistinctMongo = function(tablename, args, callback) {
-    var selectData = function(db, callback) {
+exports.selectdistinctMongo = function (tablename, args, callback) {
+    var selectData = function (db, callback) {
         //连接到表
         var collection = db.collection(tablename);
         //查询数据
-        collection.distinct(args, function(err, result) {
+        collection.distinct(args, function (err, result) {
             if (err) {
                 console.log('Error:' + err);
                 return;
@@ -171,8 +197,8 @@ exports.selectdistinctMongo = function(tablename, args, callback) {
             callback(result);
         });
     }
-    MongoClient.connect(DB_CONN_STR, function(err, db) {
-        selectData(db, function(result) {
+    MongoClient.connect(DB_CONN_STR, function (err, db) {
+        selectData(db, function (result) {
             console.log("select distinct MongoDB:" + JSON.stringify(result));
             callback(result);
             db.close();
