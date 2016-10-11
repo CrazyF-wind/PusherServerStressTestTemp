@@ -48,6 +48,7 @@ function createClientSendMessage(socket_n) {
     //设置断开这个socket的超时时间
     setTimeout(function() {
         socket.disconnect();
+        socket.destroy();
         console.log('disconnect', email);
     }, 60000)
     socket.on('disconnect', function() {
