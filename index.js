@@ -6,7 +6,7 @@ var dbhelper = require('./dbtools/dbhelper.js');
 //     client = redis.createClient();
 
 //并发总数
-var totalNum = 50;
+var totalNum = 20;
 for (var socket_n = 0; socket_n < totalNum; socket_n++) {
     // console.log(socket_n);
     createClientSendMessage(socket_n);
