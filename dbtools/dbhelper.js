@@ -2,7 +2,7 @@
  * Created by Administrator on 2016/9/28.
  */
 var MongoClient = require('mongodb').MongoClient;
-var DB_CONN_STR = "mongodb://10.0.0.9:27017/PushStressTest";
+var DB_CONN_STR = "mongodb://127.0.0.1:27017/PushStressTest";
 
 exports.init = DB_CONN_STR;
 
