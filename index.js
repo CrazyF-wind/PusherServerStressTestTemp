@@ -6,7 +6,7 @@ var dbhelper = require('./dbtools/dbhelper.js');
 //     client = redis.createClient();
 
 //并发总数
-var totalNum = 20;
+var totalNum = 200;
 for (var socket_n = 0; socket_n < totalNum; socket_n++) {
     // console.log(socket_n);
     createClientSendMessage(socket_n);
@@ -23,7 +23,8 @@ function createClientSendMessage(socket_n) {
     socket = io.connect('http://tmyvitals.ihealthlabs.com.cn:3000', {
         transports: ['websocket'],
         query: queryStry,
-        'force new connection': true
+        'force new connection': true,
+        'reconnect': false
     });
     //console.log(socket);
     socket.my_nick = process.pid.toString() + "_" + j.toString();
@@ -47,8 +48,9 @@ function createClientSendMessage(socket_n) {
     }
     //设置断开这个socket的超时时间
     setTimeout(function() {
-        socket.disconnect();
-        socket.destroy();
+        socket.removeListener('authenticated', function() {
+            console.log('socket.removeListener');
+        })
         console.log('disconnect', email);
     }, 60000)
     socket.on('disconnect', function() {
@@ -57,9 +59,9 @@ function createClientSendMessage(socket_n) {
 }
 
 function sendMessage(j) {
-    // console.log(j)
+    console.log(j)
     var inner_socket = socket;
-    inner_socket.on('connect', function() {
+    inner_socket.once('connect', function() {
         console.info("Connected[" + j + "] => " + inner_socket.my_nick);
         inner_socket.emit('authenticate', {
             token: "fixedtoken",
@@ -67,18 +69,9 @@ function sendMessage(j) {
         });
     });
 
-    // var startTime = new Date().getTime();
-    // var interval = Math.floor(Math.random() * 10001) + 5000;
-    // var timers = setInterval(function() {
-    //     var lefttime = new Date().getTime() - startTime;
-    //     console.log('lefttime', lefttime);
-    //     if (lefttime > 10000) {
-    //         clearInterval(timers);
-    //         return;
-    //     }
-    //
-    // }, interval);
-    inner_socket.on('authenticated', function() {
+
+    inner_socket.once('authenticated', function() {
+      console.log('!!!!!!!!!!!!!!进入inner_socket.once(\'authenticated\'!!!!!!!!!!!!!!');
         var startTime = new Date().getTime();
         var interval = Math.floor(Math.random() * 10001) + 5000;
         var timers = setInterval(function() {
