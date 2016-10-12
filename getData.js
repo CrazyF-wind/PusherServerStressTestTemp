@@ -14,7 +14,7 @@ function isEmptyObject(obj) {
 }
 
 var sessionid = "";
-for (var i = 0; i < 90; i++) {
+for (var i = 0; i <200; i++) {
     for (var j = 0; j < 10; j++) {
         sessionid = "send|" + i + "|" + j
         console.log(sessionid);
@@ -31,7 +31,7 @@ for (var i = 0; i < 90; i++) {
                     "sendtime": object["sendtime"],
                     "flag": object["flag"]
                 }
-                console.log(JSON.stringify(opt) + "|" + object);
+
 
                 dbhelper.insertMongo('messageDetail', opt
                     , function () {

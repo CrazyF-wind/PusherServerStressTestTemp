@@ -20,7 +20,7 @@ function createClientSendMessage(socket_n) {
     var token = "fixedtoken";
     var email = process.pid.toString() + "_" + j.toString();
     var queryStry = "token=" + token + "&&email=" + email + "&&uniqueID=" + email;
-    socket = io.connect('http://tmyvitals.ihealthlabs.com.cn:3000', {
+    const socket = io.connect('http://tmyvitals.ihealthlabs.com.cn:3000', {
         transports: ['websocket'],
         query: queryStry,
         'force new connection': true,
@@ -29,7 +29,7 @@ function createClientSendMessage(socket_n) {
     //console.log(socket);
     socket.my_nick = process.pid.toString() + "_" + j.toString();
 
-    sendMessage(j);
+    sendMessage(j,socket);
     socket.on('receiveMessage', function(msg) {
         if (Object.prototype.toString.call(msg) === '[object Array]') {
             //notifyMe(msg.user,msg.comment);
@@ -48,30 +48,30 @@ function createClientSendMessage(socket_n) {
     }
     //设置断开这个socket的超时时间
     setTimeout(function() {
-        socket.removeListener('authenticated', function() {
-            console.log('socket.removeListener');
-        })
-        console.log('disconnect', email);
-    }, 60000)
+        //socket.removeListener('authenticated', function() {
+        //    console.log('socket.removeListener');
+        //})
+        socket.disconnect()
+
+
+    },60000)
     socket.on('disconnect', function() {
         // console.info("Disconnected");
+        console.log('disconnect', email);
     });
 }
 
-function sendMessage(j) {
+function sendMessage(j,socket) {
     console.log(j)
     var inner_socket = socket;
-    inner_socket.once('connect', function() {
+    inner_socket.on('connect', function() {
         console.info("Connected[" + j + "] => " + inner_socket.my_nick);
-        inner_socket.emit('authenticate', {
-            token: "fixedtoken",
-            email: inner_socket.my_nick
-        });
-    });
+        //inner_socket.emit('authenticate', {
+        //    token: "fixedtoken",
+        //    email: inner_socket.my_nick
+        //});
 
 
-    inner_socket.once('authenticated', function() {
-      console.log('!!!!!!!!!!!!!!进入inner_socket.once(\'authenticated\'!!!!!!!!!!!!!!');
         var startTime = new Date().getTime();
         var interval = Math.floor(Math.random() * 10001) + 5000;
         var timers = setInterval(function() {
@@ -88,7 +88,7 @@ function sendMessage(j) {
                 from: inner_socket.my_nick,
                 to: toUser,
                 message: "Regular timer message every " + interval + " ms dt:" +
-                    new Date().getTime() + " redom:" + Math.random() + ""
+                new Date().getTime() + " redom:" + Math.random() + ""
             }
             inner_socket.emit('sendMessage', msg);
 
@@ -98,6 +98,12 @@ function sendMessage(j) {
 
         }, interval);
     });
+
+
+    //inner_socket.once('authenticated', function() {
+    //  console.log('!!!!!!!!!!!!!!进入inner_socket.once(\'authenticated\'!!!!!!!!!!!!!!');
+    //
+    //});
 }
 
 var queue = new Array();

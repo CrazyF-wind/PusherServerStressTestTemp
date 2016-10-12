@@ -134,14 +134,14 @@ exports.updateMongoWithOption = function (tablename, where, sets, option, callba
         //    mongos: {}
         //},
         function (err, db) {
-            if (err) {
-                console.log('Error:' + err);
-                // return;
-            }
+            //if (err) {
+            //    console.log('Error:' + err);
+            //    // return;
+            //}
             editdata(db, function (result) {
                 callback(result);
                 db.close();
-                console.log('connect close' + db);
+                //console.log('connect close' + db);
             });
         });
 
