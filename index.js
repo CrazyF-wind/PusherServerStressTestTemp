@@ -6,7 +6,7 @@ var dbhelper = require('./dbtools/dbhelper.js');
 //     client = redis.createClient();
 
 //并发总数
-var totalNum = 200;
+var totalNum = 100;
 for (var socket_n = 0; socket_n < totalNum; socket_n++) {
     // console.log(socket_n);
     createClientSendMessage(socket_n);
@@ -29,7 +29,7 @@ function createClientSendMessage(socket_n) {
     //console.log(socket);
     socket.my_nick = process.pid.toString() + "_" + j.toString();
 
-    sendMessage(j,socket);
+    sendMessage(j, socket);
     socket.on('receiveMessage', function(msg) {
         if (Object.prototype.toString.call(msg) === '[object Array]') {
             //notifyMe(msg.user,msg.comment);
@@ -39,6 +39,7 @@ function createClientSendMessage(socket_n) {
         } else {
             readMessage(msg);
         }
+        receiveCount = receiveCount+1;
     });
 
     function readMessage(msg) {
@@ -47,37 +48,37 @@ function createClientSendMessage(socket_n) {
 
     }
     //设置断开这个socket的超时时间
-    setTimeout(function() {
-        //socket.removeListener('authenticated', function() {
-        //    console.log('socket.removeListener');
-        //})
-        socket.disconnect()
-
-
-    },60000)
+    // setTimeout(function() {
+    //     //socket.removeListener('authenticated', function() {
+    //     //    console.log('socket.removeListener');
+    //     //})
+    //     socket.disconnect()
+    //
+    //
+    // },60000)
     socket.on('disconnect', function() {
         // console.info("Disconnected");
         console.log('disconnect', email);
     });
 }
+sendCount = 0;
+receiveCount = 0;
 
-function sendMessage(j,socket) {
-    console.log(j)
+function sendMessage(j, socket) {
+    // console.log(j)
     var inner_socket = socket;
-    inner_socket.on('connect', function() {
+    inner_socket.once('connect', function() {
         console.info("Connected[" + j + "] => " + inner_socket.my_nick);
         //inner_socket.emit('authenticate', {
         //    token: "fixedtoken",
         //    email: inner_socket.my_nick
         //});
-
-
         var startTime = new Date().getTime();
         var interval = Math.floor(Math.random() * 10001) + 5000;
         var timers = setInterval(function() {
             var lefttime = new Date().getTime() - startTime;
             console.log('lefttime', lefttime);
-            if (lefttime > 60000) {
+            if (lefttime > 300000) {
                 clearInterval(timers);
                 console.log('clearInterval');
                 return;
@@ -88,10 +89,11 @@ function sendMessage(j,socket) {
                 from: inner_socket.my_nick,
                 to: toUser,
                 message: "Regular timer message every " + interval + " ms dt:" +
-                new Date().getTime() + " redom:" + Math.random() + ""
+                    new Date().getTime() + " redom:" + Math.random() + ""
             }
             inner_socket.emit('sendMessage', msg);
-
+            //增加发送计数
+            sendCount = sendCount+1;
             var sendtime = new Date();
             //入队
             inqueue(msg, true);
@@ -188,7 +190,10 @@ function outqueue() {
                     })
                     // console.info(msg.from + " said at " + msg.sendDate + " : " + msg.message);
             }
+            console.log('队列剩余：', queue.length);
 
+        } else {
+            console.log('队列已空 发送：' + sendCount + ' 接收：' + receiveCount);
         }
 
     }, 100)
